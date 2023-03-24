@@ -55,7 +55,7 @@ def get_bots_by_user_id(user_id) -> List[schemas.BotOut]:
     for bot, count in result:
         res.append(
             schemas.BotOut(bot_id=bot.bot_id, manager_id=bot.manager_id, name=bot.name,
-                           api_token=bot.api_token, ques_count=count))
+                           api_token=bot.api_token, ques_count=count, owner_id=bot.owner_id))
     return res
 
 

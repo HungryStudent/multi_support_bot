@@ -79,6 +79,8 @@ async def main():
 
     polling_manager = PollingManager()
 
+    for bot in bots:
+        await bot.get_updates(offset=-1)
     await dp.start_polling(*bots, dp_for_new_bot=dop_dp, polling_manager=polling_manager)
 
 
