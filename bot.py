@@ -14,7 +14,7 @@ import core
 from config import TOKEN, ADMINS
 from core import crud, models, schemas
 from core.database import engine
-from handlers import bots_manage, user, other, dop
+from handlers import bots_manage, user, other, dop, admin
 from polling_manager import PollingManager
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ async def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
-    dp.include_routers(user.router, bots_manage.router, other.router)
+    dp.include_routers(user.router, bots_manage.router, other.router, admin.router)
 
     dop_dp = Dispatcher(events_isolation=SimpleEventIsolation())
     dop_dp.include_routers(dop.user.router, dop.system.router, dop.admin.router)

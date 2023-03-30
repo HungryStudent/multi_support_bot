@@ -87,3 +87,9 @@ def add_ques(ques_data: schemas.QuestionCreate):
     db.add(ques)
     db.commit()
     return db.query(models.Bots.manager_id).filter(models.Bots.bot_id == ques_data.bot_id).first()
+
+
+def get_stat():
+    db: Session = get_db()
+    stat_data = db.query(func.count(models.Users.user_id), func.count(models.Bots.bot_id)).join(models.Bots, isouter=True).first()
+    return stat_data

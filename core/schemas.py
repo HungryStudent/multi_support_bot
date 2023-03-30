@@ -37,5 +37,5 @@ class QuestionCreate(BaseModel):
     bot_id: int
     user_id: int
     msg_id: int
-    ques: str
+    ques: str = None
     create_time: datetime

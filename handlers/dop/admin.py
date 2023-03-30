@@ -21,5 +21,14 @@ router.message.filter(IsAdminFilter())
 @router.message(F.reply_to_message)
 async def answer_to_ques(message: Message, bot: Bot):
     entities = message.reply_to_message.entities
-    hashtag = entities[-1].extract_from(message.reply_to_message.text)
+    try:
+        hashtag = entities[-1].extract_from(message.reply_to_message.text)
+    except TypeError:
+        try:
+            if message.reply_to_message.caption.split("\n")[2] != "":
+                hashtag_start = message.reply_to_message.caption.find("#id")
+                hashtag_end = message.reply_to_message.caption.find("\n", hashtag_start) + 1
+                hashtag = message.reply_to_message.caption[hashtag_start:hashtag_end]
+        except IndexError:
+            hashtag = message.reply_to_message.caption
     await bot.send_message(int(hashtag[3:]), message.text)

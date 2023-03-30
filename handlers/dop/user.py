@@ -38,4 +38,50 @@ async def send_ques(message: Message, bot: Bot):
                                   create_time=datetime.datetime.now())
     manager_id = crud.add_ques(ques)[0]
     if manager_id:
-        await bot.send_message(manager_id, message.text + f"\n\n#id{message.from_user.id}")
+        await bot.send_message(manager_id, f"#id{message.from_user.id}\n\n" + message.text)
+
+
+@router.message(F.video)
+async def send_video(message: Message, bot: Bot):
+    my_bot = crud.get_bot_by_token(bot.token)
+    ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
+                                  ques=message.caption,
+                                  create_time=datetime.datetime.now())
+    manager_id = crud.add_ques(ques)[0]
+    user_text = message.caption
+    if user_text is None:
+        user_text = ""
+    if manager_id:
+        await bot.send_video(manager_id, video=message.video.file_id,
+                             caption=f"#id{message.from_user.id}\n\n" + user_text)
+
+
+@router.message(F.document)
+async def send_document(message: Message, bot: Bot):
+    my_bot = crud.get_bot_by_token(bot.token)
+    ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
+                                  ques=message.caption,
+                                  create_time=datetime.datetime.now())
+    manager_id = crud.add_ques(ques)[0]
+
+    user_text = message.caption
+    if user_text is None:
+        user_text = ""
+    if manager_id:
+        await bot.send_document(manager_id, document=message.document.file_id,
+                                caption=f"#id{message.from_user.id}\n\n" + user_text)
+
+
+@router.message(F.photo)
+async def send_photo(message: Message, bot: Bot):
+    my_bot = crud.get_bot_by_token(bot.token)
+    ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
+                                  ques=message.caption,
+                                  create_time=datetime.datetime.now())
+    manager_id = crud.add_ques(ques)[0]
+    user_text = message.caption
+    if user_text is None:
+        user_text = ""
+    if manager_id:
+        await bot.send_photo(manager_id, photo=message.photo[-1].file_id,
+                             caption=f"#id{message.from_user.id}\n\n" + user_text)
