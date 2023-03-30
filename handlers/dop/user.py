@@ -33,6 +33,9 @@ async def cancel(message: Message, state: FSMContext):
 @router.message(F.text)
 async def send_ques(message: Message, bot: Bot):
     my_bot = crud.get_bot_by_token(bot.token)
+    if crud.get_banned_user(bot.id, message.from_user.id):
+        await message.answer("Вы получили бан от администрации")
+        return
     ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
                                   ques=message.text,
                                   create_time=datetime.datetime.now())
@@ -44,6 +47,9 @@ async def send_ques(message: Message, bot: Bot):
 @router.message(F.video)
 async def send_video(message: Message, bot: Bot):
     my_bot = crud.get_bot_by_token(bot.token)
+    if crud.get_banned_user(bot.id, message.from_user.id):
+        await message.answer("Вы получили бан от администрации")
+        return
     ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
                                   ques=message.caption,
                                   create_time=datetime.datetime.now())
@@ -59,6 +65,9 @@ async def send_video(message: Message, bot: Bot):
 @router.message(F.document)
 async def send_document(message: Message, bot: Bot):
     my_bot = crud.get_bot_by_token(bot.token)
+    if crud.get_banned_user(bot.id, message.from_user.id):
+        await message.answer("Вы получили бан от администрации")
+        return
     ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
                                   ques=message.caption,
                                   create_time=datetime.datetime.now())
@@ -75,6 +84,9 @@ async def send_document(message: Message, bot: Bot):
 @router.message(F.photo)
 async def send_photo(message: Message, bot: Bot):
     my_bot = crud.get_bot_by_token(bot.token)
+    if crud.get_banned_user(bot.id, message.from_user.id):
+        await message.answer("Вы получили бан от администрации")
+        return
     ques = schemas.QuestionCreate(bot_id=my_bot.bot_id, user_id=message.from_user.id, msg_id=message.message_id,
                                   ques=message.caption,
                                   create_time=datetime.datetime.now())

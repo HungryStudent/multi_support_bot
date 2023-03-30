@@ -95,3 +95,23 @@ def get_stat():
     stat_data[0] = db.query(func.count(models.Users.user_id)).first()[0]
     stat_data[1] = db.query(func.count(models.Bots.bot_id)).first()[0]
     return stat_data
+
+
+def ban_user(bot_id, user_id):
+    db: Session = get_db()
+    banned_user = models.BannedUsers(bot_id=bot_id, user_id=user_id)
+    db.add(banned_user)
+    db.commit()
+
+
+def unban_user(bot_id, user_id):
+    db: Session = get_db()
+    db.query(models.BannedUsers).where(models.BannedUsers.bot_id == bot_id,
+                                       models.BannedUsers.user_id == user_id).delete()
+    db.commit()
+
+
+def get_banned_user(bot_id, user_id):
+    db: Session = get_db()
+    return db.query(models.BannedUsers).where(models.BannedUsers.bot_id == bot_id,
+                                       models.BannedUsers.user_id == user_id).first()

@@ -22,6 +22,14 @@ class Bots(Base):
     owner_id = Column(BigInteger, ForeignKey(Users.user_id))
 
 
+class BannedUsers(Base):
+    __tablename__ = "banned_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    bot_id = Column(BigInteger)
+    user_id = Column(BigInteger)
+
+
 class Questions(Base):
     __tablename__ = "questions"
 
