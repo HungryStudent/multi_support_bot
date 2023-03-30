@@ -91,5 +91,7 @@ def add_ques(ques_data: schemas.QuestionCreate):
 
 def get_stat():
     db: Session = get_db()
-    stat_data = db.query(func.count(models.Users.user_id), func.count(models.Bots.bot_id)).join(models.Bots, isouter=True).first()
+    stat_data = [0, 0]
+    stat_data[0] = db.query(func.count(models.Users.user_id)).first()[0]
+    stat_data[1] = db.query(func.count(models.Bots.bot_id)).first()[0]
     return stat_data
