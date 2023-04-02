@@ -6,13 +6,13 @@ from pydantic import BaseModel
 
 class UserCreate(BaseModel):
     user_id: int
-    username: str
+    username: str = None
     reg_time: datetime
 
 
 class UserOut(BaseModel):
     user_id: int
-    username: str
+    username: str = None
     reg_time: datetime
 
 

@@ -114,4 +114,4 @@ def unban_user(bot_id, user_id):
 def get_banned_user(bot_id, user_id):
     db: Session = get_db()
     return db.query(models.BannedUsers).where(models.BannedUsers.bot_id == bot_id,
-                                       models.BannedUsers.user_id == user_id).first()
+                                              models.BannedUsers.user_id == user_id).first()
