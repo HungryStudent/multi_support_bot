@@ -27,7 +27,7 @@ class BotOut(BaseModel):
     bot_id: int
     name: str
     api_token: str
-    manager_id: int
+    manager_id: int = None
     owner_id: int
 
     ques_count: int
