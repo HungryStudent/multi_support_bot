@@ -19,9 +19,10 @@ router.message.filter(ChatTypeFilter(chat_type="private"))
 
 
 @router.message(Command("start"))
-async def start(message: Message, state: FSMContext):
+async def start(message: Message, state: FSMContext, bot: Bot):
     await state.clear()
-    await message.answer("Здравствуйте")
+    my_bot = crud.get_bot_by_token(bot.token)
+    await message.answer(my_bot.hello_msg)
 
 
 @router.message(Text("Отмена"))

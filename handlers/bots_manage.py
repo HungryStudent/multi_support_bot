@@ -14,7 +14,7 @@ from keyboards import user as user_kb
 from config import ADMINS, TOKEN
 from core import crud, schemas, manage_bots
 from polling_manager import PollingManager
-from states.user import CreateBot
+from states.user import CreateBot, ChangeHelloMsg
 
 router = Router()
 router.my_chat_member.filter(F.chat.type.in_({"group", "supergroup"}))
@@ -30,6 +30,23 @@ async def show_bot(call: CallbackQuery, callback_data: user_kb.BotFactory):
     bot = crud.get_bot(callback_data.bot_id)
     await call.message.answer(f"{bot.name}", reply_markup=user_kb.get_bot(bot.bot_id))
     await call.answer()
+
+
+@router.callback_query(user_kb.MenuBotFactory.filter(F.action == 'change_hello_msg'))
+async def change_hello_msg(call: CallbackQuery, callback_data: user_kb.MenuBotFactory, state: FSMContext):
+    await call.message.answer("Введите приветственное сообщение", reply_markup=user_kb.cancel)
+    await state.set_state(ChangeHelloMsg.text)
+    await state.update_data(bot_id=callback_data.bot_id)
+    await call.answer()
+
+
+@router.message(ChangeHelloMsg.text)
+async def change_hello_msg_finish(message: Message, state: FSMContext):
+    await state.update_data(name=message.text)
+    await message.answer('Приветствие изменено')
+    data = await state.get_data()
+    await state.clear()
+    crud.change_hello_msg(message.text, data['bot_id'])
 
 
 @router.callback_query(user_kb.MenuBotFactory.filter(F.action == "delete"))
@@ -75,7 +92,6 @@ async def enter_name(message: Message, state: FSMContext):
 @router.message(CreateBot.api_token)
 async def enter_api_token(message: Message, state: FSMContext, dp_for_new_bot: Dispatcher,
                           polling_manager: PollingManager):
-
     try:
         await Bot(message.text).get_me()
     except (TokenValidationError, TelegramUnauthorizedError):
@@ -88,6 +104,7 @@ async def enter_api_token(message: Message, state: FSMContext, dp_for_new_bot: D
 
     bot_data = await state.get_data()
     bot_data["owner_id"] = message.from_user.id
+    bot_data['hello_msg'] = 'Здравствуйте! Операторы онлайн, расскажите что у вас случилось?'
     crud.add_bot(schemas.BotCreate(**bot_data))
     my_bot = Bot(message.text)
     bot_info = await my_bot.get_me()

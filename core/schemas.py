@@ -21,6 +21,7 @@ class BotCreate(BaseModel):
     name: str
     api_token: str
     owner_id: int
+    hello_msg: str
 
 
 class BotOut(BaseModel):
@@ -29,7 +30,7 @@ class BotOut(BaseModel):
     api_token: str
     manager_id: int = None
     owner_id: int
-
+    hello_msg: str
     ques_count: int
 
 

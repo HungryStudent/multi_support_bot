@@ -20,6 +20,7 @@ class Bots(Base):
     api_token = Column(VARCHAR(50))
     manager_id = Column(BigInteger)
     owner_id = Column(BigInteger, ForeignKey(Users.user_id))
+    hello_msg = Column(VARCHAR(3000))
 
 
 class BannedUsers(Base):
