@@ -41,8 +41,12 @@ def get_bots(bots: List[schemas.BotOut]):
 
 def get_bot(bot_id):
     builder = InlineKeyboardBuilder()
-    builder.button(text="Изменить приветствие", callback_data=MenuBotFactory(action="change_hello_msg", bot_id=bot_id))
-    builder.button(text="Удалить проект", callback_data=MenuBotFactory(action="delete", bot_id=bot_id))
+    buttons = [InlineKeyboardButton(text="Изменить приветствие",
+                                    callback_data=MenuBotFactory(action="change_hello_msg", bot_id=bot_id).pack()),
+               InlineKeyboardButton(text="Удалить проект",
+                                    callback_data=MenuBotFactory(action="delete", bot_id=bot_id).pack())]
+    builder.add(*buttons)
+    builder.adjust(1)
     return builder.as_markup()
 
 
