@@ -55,4 +55,12 @@ async def answer_to_ques(message: Message, bot: Bot):
                 hashtag = message.reply_to_message.caption[hashtag_start:hashtag_end]
         except IndexError:
             hashtag = message.reply_to_message.caption
-    await bot.send_message(int(hashtag[3:]), message.text)
+
+    if message.photo:
+        await bot.send_photo(int(hashtag[3:]), message.photo[-1].file_id, caption=message.caption)
+    elif message.video:
+        await bot.send_video(int(hashtag[3:]), message.video.file_id, caption=message.caption)
+    elif message.document:
+        await bot.send_document(int(hashtag[3:]), message.document.file_id, caption=message.caption)
+    else:
+        await bot.send_message(int(hashtag[3:]), message.text)
