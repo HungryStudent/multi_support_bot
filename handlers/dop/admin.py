@@ -1,18 +1,10 @@
-import datetime
-
+from aiogram import F
 from aiogram import Router, Bot
 from aiogram.filters import Command
-from aiogram.filters.text import Text
-from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
-from aiogram import F
+from aiogram.types import Message
 
+from core import crud
 from filters.is_admin import IsAdminFilter
-from keyboards import admin as admin_kb
-from keyboards.dop import user as user_kb
-from config import ADMINS, TOKEN
-from core import crud, schemas
-from states.dop.user import AskQues
 
 router = Router()
 router.message.filter(IsAdminFilter())

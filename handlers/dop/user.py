@@ -10,7 +10,7 @@ from aiogram import F
 from filters.chat_type import ChatTypeFilter
 from keyboards import admin as admin_kb
 from keyboards.dop import user as user_kb
-from config import ADMINS, TOKEN
+from config import ADMINS
 from core import crud, schemas
 from states.dop.user import AskQues
 

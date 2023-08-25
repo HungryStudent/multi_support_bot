@@ -3,19 +3,23 @@ import logging
 from typing import List
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters.command import Command, CommandObject
-from aiogram.fsm.storage.memory import SimpleEventIsolation
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramUnauthorizedError
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeDefault
-from aiogram.utils.markdown import html_decoration as fmt
-from aiogram.utils.token import TokenValidationError
+from aiogram.webhook.aiohttp_server import (
+    SimpleRequestHandler,
+    TokenBasedRequestHandler,
+    setup_application,
+)
+from aiohttp import web
 
-import core
-from config import TOKEN, ADMINS
-from core import crud, models, schemas
+from config import MAIN_BOT_TOKEN, OTHER_BOTS_PATH, WEB_SERVER_HOST, WEB_SERVER_PORT, MAIN_BOT_PATH, \
+    BASE_URL, OTHER_BOTS_URL
+from core import crud, models
 from core.database import engine
 from handlers import bots_manage, user, other, dop, admin
-from polling_manager import PollingManager
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +47,17 @@ async def on_bot_shutdown(bot: Bot):
     pass
 
 
-async def on_startup(dp_for_new_bot, polling_manager):
+async def on_startup(dispatcher: Dispatcher, bot: Bot):
+    await bot.set_webhook(f"{BASE_URL}{MAIN_BOT_PATH}")
     bots = crud.get_bots()
-    for bot in bots:
-        await core.manage_bots.add_bot(bot.api_token, dp_for_new_bot, polling_manager)
+    for db_bot in bots:
+        new_bot = Bot(token=db_bot.api_token, session=bot.session)
+        try:
+            await new_bot.get_me()
+        except TelegramUnauthorizedError:
+            continue
+        await new_bot.delete_webhook(drop_pending_updates=True)
+        await new_bot.set_webhook(OTHER_BOTS_URL.format(bot_token=db_bot.api_token))
 
 
 async def on_shutdown(bots: List[Bot]):
@@ -58,34 +69,37 @@ async def echo(message: types.Message):
     await message.answer(message.text)
 
 
-async def main():
+def main():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
 
     models.Base.metadata.create_all(bind=engine)
-    TOKENS = [TOKEN]
-    bots = [Bot(token) for token in TOKENS]
 
-    dp = Dispatcher(events_isolation=SimpleEventIsolation())
-    dp.startup.register(on_startup)
-    dp.shutdown.register(on_shutdown)
+    session = AiohttpSession()
+    bot_settings = {"session": session, "parse_mode": ParseMode.HTML}
+    bot = Bot(token=MAIN_BOT_TOKEN, **bot_settings)
+    storage = MemoryStorage()
+    main_dispatcher = Dispatcher(storage=storage)
+    main_dispatcher.include_routers(user.router, bots_manage.router, other.router, admin.router)
+    main_dispatcher.startup.register(on_startup)
 
-    dp.include_routers(user.router, bots_manage.router, other.router, admin.router)
+    multibot_dispatcher = Dispatcher(storage=storage)
+    multibot_dispatcher.include_routers(dop.user.router, dop.system.router, dop.admin.router)
 
-    dop_dp = Dispatcher(events_isolation=SimpleEventIsolation())
-    dop_dp.include_routers(dop.user.router, dop.system.router, dop.admin.router)
+    app = web.Application()
+    SimpleRequestHandler(dispatcher=main_dispatcher, bot=bot).register(app, path=MAIN_BOT_PATH)
+    TokenBasedRequestHandler(
+        dispatcher=multibot_dispatcher,
+        bot_settings=bot_settings,
+    ).register(app, path=OTHER_BOTS_PATH)
 
-    polling_manager = PollingManager()
+    setup_application(app, main_dispatcher, bot=bot)
+    setup_application(app, multibot_dispatcher)
 
-    for bot in bots:
-        await bot.get_updates(offset=-1)
-    await dp.start_polling(*bots, dp_for_new_bot=dop_dp, polling_manager=polling_manager)
+    web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        logger.error("Exit")
+    main()

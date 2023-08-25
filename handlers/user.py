@@ -1,18 +1,16 @@
 import datetime
 
-from aiogram import Router, Bot
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.filters.text import Text
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
-from aiogram import F
+from aiogram.types import Message
 
+# from keyboards import user as user_kb
+from config import ADMINS
+from core import crud, schemas
 from keyboards import admin as admin_kb
 from keyboards import user as user_kb
-# from keyboards import user as user_kb
-from config import ADMINS, TOKEN
-from core import crud, schemas
-from states.admin import CreateBot
 
 router = Router()
 
